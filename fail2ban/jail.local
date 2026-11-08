@@ -1,0 +1,52 @@
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 5
+backend = auto
+usedns = warn
+ignoreip = 127.0.0.1/8 ::1
+
+[nginx-http-auth]
+enabled = true
+filter = nginx-http-auth
+port = http,https
+logpath = /var/log/nginx/error.log
+maxretry = 3
+
+[nginx-limit-req]
+enabled = true
+filter = nginx-limit-req
+port = http,https
+logpath = /var/log/nginx/error.log
+maxretry = 10
+findtime = 60
+
+[nginx-botsearch]
+enabled = true
+filter = nginx-botsearch
+port = http,https
+logpath = /var/log/nginx/access.log
+maxretry = 2
+
+[nginx-scan]
+enabled = true
+filter = nginx-scan
+port = http,https
+logpath = /var/log/nginx/access.log
+maxretry = 5
+
+[nginx-404]
+enabled = true
+filter = nginx-404
+port = http,https
+logpath = /var/log/nginx/access.log
+maxretry = 10
+findtime = 60
+
+[custom-bad-ua]
+enabled = true
+filter = custom-bad-ua
+port = http,https
+logpath = /var/log/nginx/access.log
+maxretry = 1
+findtime = 60

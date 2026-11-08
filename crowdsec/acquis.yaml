@@ -1,0 +1,9 @@
+acq:
+  - filename: /var/log/nginx/access.log
+    poll: false
+    tail: true
+    user_agent: nginx
+    type: http
+    format: nginx
+    mode: stream
+    decoder: raw

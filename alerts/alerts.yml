@@ -1,0 +1,72 @@
+groups:
+  - name: anti-ddos
+    rules:
+      # Rate limit exceeded
+      - alert: NginxRateLimitExceeded
+        expr: rate(nginx_http_requests_total{status=~"429|403"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rate limit/403 terpicu di Nginx"
+          description: "Rate limit (429) atau blokir WAF (403) terjadi pada {{ $labels.path }}"
+
+      # Lonjakan traffic mencurigakan
+      - alert: HighTrafficSpike
+        expr: increase(nginx_http_requests_total[5m]) > 5000
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Lonjakan request mencurigakan"
+          description: "Lonjakan tiba-tiba {{ $value }} request dari {{ $labels.method }} {{ $labels.path }}"
+
+      # Error rate tinggi
+      - alert: HighErrorRate
+        expr: (sum(rate(nginx_http_requests_total{status=~"5.."}[5m])) / sum(rate(nginx_http_requests_total[5m]))) * 100 > 5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Error rate tinggi (>5%)"
+          description: "Error rate {{ $value | printf \"%.2f\" }}% di {{ $labels.job }}"
+
+      # Redis memory tinggi
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes > 200 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory tinggi (>200MB)"
+          description: "Redis menggunakan {{ $value | humanize1024 }}, performa mungkin menurun"
+
+      # Brute force login
+      - alert: BruteForceLogin
+        expr: rate(nginx_http_requests_total{path="/login"}[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Brute force login terdeteksi"
+          description: "{{ $value }} percobaan login per detik dari satu IP"
+
+      # CrowdSec decisions
+      - alert: CrowdSecDecision
+        expr: crowdsec_decisions_total > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CrowdSec memblokir IP"
+          description: "{{ $value }} keputusan block dari CrowdSec"
+
+      # Fail2Ban banned IPs
+      - alert: Fail2BanBanned
+        expr: fail2ban_banned_total > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Fail2Ban memblokir IP"
+          description: "{{ $value }} IP diblokir Fail2Ban"
